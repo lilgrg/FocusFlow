@@ -1,14 +1,17 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
+import Collapsible from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
+  const router = useRouter();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -16,81 +19,98 @@ export default function TabTwoScreen() {
         <IconSymbol
           size={310}
           color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
+          name="brain.head.profile"
           style={styles.headerImage}
         />
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
+
+      <Collapsible title="Focus Techniques">
         <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+          Discover different focus techniques to boost your productivity:
         </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
+        <View style={styles.techniqueList}>
+          <TouchableOpacity style={styles.techniqueItem} onPress={() => router.push('/(tabs)/focus')}>
+            <Ionicons name="timer-outline" size={24} color="#FF6B6B" />
+            <ThemedText style={styles.techniqueTitle}>Pomodoro Technique</ThemedText>
+            <ThemedText style={styles.techniqueDesc}>25-minute focused work sessions</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.techniqueItem} onPress={() => router.push('/(tabs)/focus')}>
+            <Ionicons name="fitness-outline" size={24} color="#4ECDC4" />
+            <ThemedText style={styles.techniqueTitle}>Deep Work</ThemedText>
+            <ThemedText style={styles.techniqueDesc}>Extended periods of focused work</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.techniqueItem} onPress={() => router.push('/(tabs)/focus')}>
+            <Ionicons name="calendar-outline" size={24} color="#45B7D1" />
+            <ThemedText style={styles.techniqueTitle}>Time Blocking</ThemedText>
+            <ThemedText style={styles.techniqueDesc}>Schedule your day in blocks</ThemedText>
+          </TouchableOpacity>
+        </View>
       </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
+
+      <Collapsible title="Productivity Tips">
         <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
+          Learn how to optimize your work environment and habits:
         </ThemedText>
+        <View style={styles.tipsList}>
+          <View style={styles.tipItem}>
+            <Ionicons name="water-outline" size={24} color="#96CEB4" />
+            <ThemedText style={styles.tipText}>Stay hydrated - drink water regularly</ThemedText>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="walk-outline" size={24} color="#FFEEAD" />
+            <ThemedText style={styles.tipText}>Take regular movement breaks</ThemedText>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="moon-outline" size={24} color="#4ECDC4" />
+            <ThemedText style={styles.tipText}>Get enough sleep for better focus</ThemedText>
+          </View>
+        </View>
       </Collapsible>
-      <Collapsible title="Images">
+
+      <Collapsible title="Focus Resources">
         <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
+          Explore these resources to learn more about focus and productivity:
         </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
+        <View style={styles.resourcesList}>
+          <ExternalLink href="https://www.calnewport.com/books/deep-work/">
+            <ThemedText type="link">Deep Work by Cal Newport</ThemedText>
+          </ExternalLink>
+          <ExternalLink href="https://francescocirillo.com/pages/pomodoro-technique">
+            <ThemedText type="link">The Pomodoro Technique</ThemedText>
+          </ExternalLink>
+          <ExternalLink href="https://www.atlassian.com/time-management/time-blocking">
+            <ThemedText type="link">Time Blocking Guide</ThemedText>
+          </ExternalLink>
+        </View>
       </Collapsible>
-      <Collapsible title="Custom fonts">
+
+      <Collapsible title="App Features">
         <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
+          Make the most of FocusFlow's features:
         </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
+        <View style={styles.featuresList}>
+          <View style={styles.featureItem}>
+            <Ionicons name="timer-outline" size={24} color="#FF6B6B" />
+            <ThemedText style={styles.featureText}>Customizable focus sessions</ThemedText>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="water-outline" size={24} color="#4ECDC4" />
+            <ThemedText style={styles.featureText}>Water intake tracking</ThemedText>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="fitness-outline" size={24} color="#45B7D1" />
+            <ThemedText style={styles.featureText}>Movement break reminders</ThemedText>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="moon-outline" size={24} color="#96CEB4" />
+            <ThemedText style={styles.featureText}>Focus mode to minimize distractions</ThemedText>
+          </View>
+        </View>
       </Collapsible>
     </ParallaxScrollView>
   );
@@ -106,5 +126,63 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
+    marginBottom: 16,
+  },
+  techniqueList: {
+    gap: 12,
+    marginTop: 12,
+  },
+  techniqueItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  techniqueTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 12,
+    flex: 1,
+  },
+  techniqueDesc: {
+    fontSize: 14,
+    color: '#666',
+  },
+  tipsList: {
+    gap: 12,
+    marginTop: 12,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+  },
+  tipText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  resourcesList: {
+    gap: 12,
+    marginTop: 12,
+  },
+  featuresList: {
+    gap: 12,
+    marginTop: 12,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+  },
+  featureText: {
+    marginLeft: 12,
+    flex: 1,
   },
 });
