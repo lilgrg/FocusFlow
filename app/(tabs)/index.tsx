@@ -7,9 +7,11 @@ import {
     Alert,
     StyleSheet,
     Text,
-    View
+    View,
+    Switch
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { RecurrenceFrequency } from '../../components/RoutineModal'; // Import RecurrenceFrequency
 import { FABMenu } from '../../components/FABMenu';
 import { RoutineModal } from '../../components/RoutineModal';
 import { TaskList } from '../../components/TaskList';
@@ -17,7 +19,8 @@ import { ThemedView } from '../../components/ThemedView';
 import { useRoutineTasks } from '../../hooks/useRoutineTasks';
 import { routineService } from '../../services/RoutineService';
 import { useFocusStore } from '../../store/focusStore';
-import { TimedRoutineItem } from '../../types/RoutineTypes';
+import { Recurrence, TimedRoutineItem } from '../../types/RoutineTypes';
+import useTaskForm from '../hooks/useTaskForm';
 
 const PRIORITY_OPTIONS = [
   { label: 'High', value: 'high' },
@@ -63,6 +66,9 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('personal');
   const [selectedDuration, setSelectedDuration] = useState(60);
   const [taskDescription, setTaskDescription] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false); // New state for recurring task
+  const [recurrenceInterval, setRecurrenceInterval] = useState<string>('1');
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(undefined);
   const [isFABOpen, setIsFABOpen] = useState(false);
 
   const {
@@ -207,8 +213,17 @@ export default function HomeScreen() {
         priority: selectedPriority as 'high' | 'medium' | 'low',
         category: selectedCategory as 'work' | 'personal' | 'health' | 'learning' | 'social',
         duration: selectedDuration,
-        isRoutine: false  // This is a non-routine task
+        isRoutine: false,  // This is a non-routine task
+        isRecurring: isRecurring, // Include recurring status
       };
+
+      // Add recurrence details if the task is recurring
+      if (isRecurring) {
+        taskData.recurrence = {
+          frequency: recurrenceFrequency,
+          endDate: recurrenceEndDate,
+        };
+      }
 
       console.log('HomeScreen: Task data prepared:', taskData);
 
@@ -224,6 +239,8 @@ export default function HomeScreen() {
       setSelectedPriority('medium');
       setSelectedCategory('personal');
       setSelectedDuration(60);
+      setIsRecurring(false); // Reset recurring state
+      setRecurrenceEndDate(undefined); // Reset recurrence end date
       setIsRoutineModalVisible(false);
 
       // Refresh tasks
@@ -240,8 +257,11 @@ export default function HomeScreen() {
     selectedIcon,
     selectedPriority,
     selectedCategory,
+    recurrenceInterval,
+    recurrenceEndDate,
     selectedDuration,
     taskManagerAddTask,
+    isRecurring,
     refreshTasks
   ]);
 
@@ -399,7 +419,13 @@ export default function HomeScreen() {
         onCategorySelect={setSelectedCategory}
         onDurationSelect={setSelectedDuration}
         onDescriptionChange={setTaskDescription}
-      />
+        onRecurringChange={setIsRecurring} // Pass the state setter
+        recurrenceFrequency={recurrenceFrequency}
+onFrequencyChange={setRecurrenceFrequency}
+        recurrenceInterval={recurrenceInterval}
+        recurrenceEndDate={recurrenceEndDate}
+      onRecurrenceEndDateChange={setRecurrenceEndDate}
+ />
     </SafeAreaView>
   );
 }

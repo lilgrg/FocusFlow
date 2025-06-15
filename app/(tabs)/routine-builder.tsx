@@ -709,10 +709,11 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   saveButton: {
+    backgroundColor: '#0A7EA4',
     fontSize: 16,
     color: '#0A7EA4',
     fontWeight: '600',
-  },
+},
   daySelector: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -859,9 +860,6 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: '#f5f5f5',
   },
-  saveButton: {
-    backgroundColor: '#0A7EA4',
-  },
   buttonText: {
     textAlign: 'center',
     fontSize: 16,
@@ -900,10 +898,6 @@ const styles = StyleSheet.create({
   },
   weekdayButtonSelected: {
     backgroundColor: '#0A7EA4',
-  },
-  weekdayText: {
-    fontSize: 14,
-    color: '#666',
   },
   weekdayTextSelected: {
     color: '#fff',

@@ -1,7 +1,11 @@
 import { ROUTINE_ICONS, TIME_SLOTS } from '@/constants/RoutineConstants';
 import type { RoutineItem } from '@/types/RoutineTypes';
-import React from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+type RecurrenceFrequency = 'Daily' | 'Weekly' | 'Monthly';
+type RecurrenceInterval = string;
 
 type RoutineModalProps = {
   visible: boolean;
@@ -23,6 +27,12 @@ type RoutineModalProps = {
   onCategorySelect: (category: string) => void;
   onDurationSelect: (duration: number) => void;
   onDescriptionChange: (text: string) => void;
+  isRecurring: boolean;
+  onRecurringChange: (value: boolean) => void;
+  onFrequencyChange?: (frequency: RecurrenceFrequency) => void;
+  onIntervalChange?: (interval: RecurrenceInterval) => void;
+  recurrenceEndDate?: Date;
+  onRecurrenceEndDateChange?: (date: Date | undefined) => void;
 };
 
 const PRIORITY_OPTIONS = [
@@ -68,28 +78,26 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
   onCategorySelect,
   onDurationSelect,
   onDescriptionChange,
+  isRecurring,
+  onRecurringChange,
+  onFrequencyChange,
+  onIntervalChange,
+  recurrenceEndDate,
+  onRecurrenceEndDateChange,
 }) => {
-  const renderTimeSlotSelector = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeSlotContainer}>
-      {TIME_SLOTS.map((time) => (
-        <TouchableOpacity
-          key={time}
-          style={[
-            styles.timeSlot,
-            selectedTime === time && styles.selectedTimeSlot,
-          ]}
-          onPress={() => onTimeSelect(time)}
-        >
-          <Text style={[
-            styles.timeSlotText,
-            selectedTime === time && styles.selectedTimeSlotText,
-          ]}>
-            {time}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<'date' | 'time'>('date');
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      onRecurrenceEndDateChange?.(selectedDate);
+    }
+  };
+
+  const showDatepicker = () => {
+    setShowDatePicker(true);
+  };
 
   const renderIconSelector = () => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.iconSelector}>
@@ -101,6 +109,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
             selectedIcon === icon && styles.selectedIcon,
           ]}
           onPress={() => onIconSelect(icon)}
+          accessibilityLabel={`Select icon ${icon}`}
         >
           <Text style={styles.iconText}>{icon}</Text>
         </TouchableOpacity>
@@ -119,6 +128,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
             selectedPriority === option.value && { borderColor: option.color, borderWidth: 2 }
           ]}
           onPress={() => onPrioritySelect(option.value)}
+          accessibilityLabel={`Select priority ${option.label}`}
         >
           <Text style={[styles.optionText, { color: option.color }]}>
             {option.label}
@@ -138,6 +148,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
             selectedCategory === option.value && styles.selectedOption
           ]}
           onPress={() => onCategorySelect(option.value)}
+          accessibilityLabel={`Select category ${option.label}`}
         >
           <Text style={styles.categoryIcon}>{option.icon}</Text>
           <Text style={styles.optionText}>{option.label}</Text>
@@ -156,8 +167,29 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
             selectedDuration === option.value && styles.selectedOption
           ]}
           onPress={() => onDurationSelect(option.value)}
+          accessibilityLabel={`Select duration ${option.label}`}
         >
           <Text style={styles.optionText}>{option.label}</Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+
+  const renderFrequencySelector = () => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectorContainer}>
+      {['Daily', 'Weekly', 'Monthly'].map((freq) => (
+        <TouchableOpacity
+          key={freq}
+          style={[
+            styles.recurrenceOption,
+            recurrenceFrequency === freq && styles.selectedOption,
+          ]}
+          onPress={() => {
+            onFrequencyChange?.(freq as RecurrenceFrequency);
+          }}
+          accessibilityLabel={`Set frequency to ${freq}`}
+        >
+          <Text style={styles.optionText}>{freq}</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -169,48 +201,94 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      statusBarTranslucent={true}
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.modalTitle}>
               {mode === 'add' ? 'Add New Task' : 'Edit Task'}
             </Text>
+  
             <TextInput
               style={styles.input}
               placeholder="Task Title"
               value={newItemTitle}
               onChangeText={onTitleChange}
+              accessibilityLabel="Task title input"
             />
-            <Text style={styles.sectionTitle}>Time</Text>
-            {renderTimeSlotSelector()}
-            <Text style={styles.sectionTitle}>Priority</Text>
-            {renderPrioritySelector()}
-            <Text style={styles.sectionTitle}>Category</Text>
-            {renderCategorySelector()}
-            <Text style={styles.sectionTitle}>Duration</Text>
-            {renderDurationSelector()}
-            <Text style={styles.sectionTitle}>Icon</Text>
-            {renderIconSelector()}
-            <Text style={styles.sectionTitle}>Description</Text>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="Add task description..."
-              value={taskDescription}
-              onChangeText={onDescriptionChange}
-              multiline
-              numberOfLines={4}
-            />
+  
+            <View style={styles.recurringContainer}>
+              <Text style={styles.sectionTitle}>Is this a recurring task?</Text>
+              <Switch 
+                value={isRecurring} 
+                onValueChange={onRecurringChange}
+                accessibilityLabel={isRecurring ? 'Recurring task enabled' : 'Recurring task disabled'}
+              />
+            </View>
+  
+            {isRecurring ? (
+              <View style={styles.recurrenceOptionsContainer}>
+                <Text style={styles.sectionTitle}>Frequency:</Text>
+                {renderFrequencySelector()}
+                <Text style={styles.sectionTitle}>End Date:</Text>
+                <TouchableOpacity
+                  style={styles.dateInputTouchable}
+                  onPress={showDatepicker}
+                  accessibilityLabel="Select end date"
+                >
+                  <Text style={styles.dateInputText}>
+                    {recurrenceEndDate ? recurrenceEndDate.toDateString() : 'Select end date'}
+                  </Text>
+                </TouchableOpacity>
+  
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={recurrenceEndDate || new Date()}
+                    mode={datePickerMode}
+                    display="default"
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+              </View>
+            ) : (
+              <View>
+                <Text style={styles.sectionTitle}>Time</Text>
+                {renderTimeSlotSelector()}
+                <Text style={styles.sectionTitle}>Priority</Text>
+                {renderPrioritySelector()}
+                <Text style={styles.sectionTitle}>Category</Text>
+                {renderCategorySelector()}
+                <Text style={styles.sectionTitle}>Duration</Text>
+                {renderDurationSelector()}
+                <Text style={styles.sectionTitle}>Icon</Text>
+                {renderIconSelector()}
+                <Text style={styles.sectionTitle}>Description</Text>
+                <TextInput
+                  style={styles.descriptionInput}
+                  placeholder="Add task description..."
+                  value={taskDescription}
+                  onChangeText={onDescriptionChange}
+                  multiline
+                  numberOfLines={4}
+                  accessibilityLabel="Task description input"
+                />
+              </View>
+            )}
+  
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.cancelButton]}
                 onPress={onClose}
+                accessibilityLabel="Cancel button"
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
                 onPress={onSave}
+                accessibilityLabel="Save button"
               >
                 <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
               </TouchableOpacity>
@@ -235,6 +313,9 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '90%',
     maxHeight: '80%',
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   modalTitle: {
     fontSize: 20,
@@ -314,6 +395,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5F5F5',
   },
+  recurrenceOption: {
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 10,
+    minWidth: 80,
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+  },
   selectedOption: {
     backgroundColor: '#4ECDC4',
   },
@@ -359,4 +448,26 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-}); 
+  recurringContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  recurrenceOptionsContainer: {
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  datePickerButtonText: {
+    color: '#666',
+  },
+});
